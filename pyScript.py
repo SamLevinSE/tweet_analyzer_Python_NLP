@@ -1,23 +1,37 @@
+#!/usr/bin/python3
+
 import pandas as pd
 
-
 def get_tweets(query, df_name):
-    from twitterscraper import query_tweets
+    from twitterscraper.query import query_tweets_once
     '''
-    Calls the query_tweets function and returns 
-    the value as a dataframe while storing it in a csv file
-    input: the query (string) | the dataframe/file-name (string)
-    output: return of the query in a csv file | and a dataframe
+    Calls the query_tweets_once function and stors it in a csv file
+    :params: the query (string) | the dataframe/file-name (string)
+    :return: 
     '''
-    tweets = query_tweets(query)
+    tweets = query_tweets_once(query, pos=1)
     df = pd.DataFrame(t.__dict__ for t in tweets)
     df.to_csv(f'{df_name}.csv')
+
+def html_scrap(url, parser_type='html.parser'):
+    from bs4 import BeautifulSoup
+    import requests
+    '''
+    Scrap the given url 
+    :params: the url (string)
+    :return: html content (HTML)
+    '''
+    page = requests.get(url)
+    html = BeautifulSoup(page.content, parser_type)
+    html.findAll(class_='css-1dbjc4n')
+    return html
+
 
 def cleanup_columns(df, to_drop, names):
     '''
     Drops unnecessary columns and renames the final ones
-    input: df (dataframe ) | to_drop (list) | names (list)
-    output: a dataframe with useful columns and columns name 
+    :params: df (dataframe ) | to_drop (list) | names (list)
+    :return: a dataframe with useful columns and columns name 
     '''
     df = df.drop(to_drop, axis=1)
     df.columns = names
@@ -26,11 +40,11 @@ def cleanup_columns(df, to_drop, names):
 def cleanup_rows(df):
     '''
     Drops all the duplicates and rows with a nan
-    input: df (dataframe)
+    :params: df (dataframe)
     outpu: df (dataframe)
     '''
     df = df.drop_duplicates(['tweetId'], keep='first')
-    df = df.dropna(subset=['text'], axis=0)
+    #df = df.dropna(subset=['text'], axis=0)
     return df
 
 def row_analysing(df, all_tweets):
@@ -44,18 +58,22 @@ def row_analysing(df, all_tweets):
     duplicate_tweets = all_tweets - df.shape[0]
     return pd.DataFrame(
         {'tweets':[all_tweets, unique_tweets, unique_tweets_en, non_eng_tweets, duplicate_tweets]}, 
-        index=['All', 'All Unique', 'En Unique', 'Not En Unique', 'Duplicate']
-        )
+        index=['All', 'All Unique', 'En Unique', 'Not En Unique', 'Duplicate'])
 
 def display_img(url):
     '''
     returns an HTML image tag
-    input: url (string)
-    output: HTML tag with src of given url
+    :params: url (string)
+    :return: HTML tag with src of given url
     '''
     return f'<img src="{url}" width=150 height=150>'
 
 def top_characteristics(_top_tweets, tops):
+    '''
+    Will analyse the given tweets and return it as a pandas DataFrame
+    :params: _top_tweets (dataFrame) | tops (int) => nr of tops
+    :return: dataFrame
+    '''
     result = pd.DataFrame(
         columns=[
             'hasMedia', 
