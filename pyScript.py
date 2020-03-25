@@ -44,7 +44,7 @@ def cleanup_rows(df):
     outpu: df (dataframe)
     '''
     df = df.drop_duplicates(['tweetId'], keep='first')
-    #df = df.dropna(subset=['text'], axis=0)
+    df = df.dropna(subset=['text'], axis=0)
     return df
 
 def row_analysing(df, all_tweets):
@@ -74,28 +74,19 @@ def top_characteristics(_top_tweets, tops):
     :params: _top_tweets (dataFrame) | tops (int) => nr of tops
     :return: dataFrame
     '''
-    result = pd.DataFrame(
-        columns=[
-            'hasMedia', 
-            'hasHashtag',
-            'avarage hashtags',
-            'avarage text length', 
-            'avarage likes',
-            'avarage retweet',
-            'avarage replies',
-            'avarage isReplied'
-            ], 
-        index=[
-            f'{tops} Tweets'
-            ]
-        )
+    result = pd.DataFrame(index=[f'{tops} Tweets'])
     
     result['hasMedia'] = len(_top_tweets[_top_tweets['hasMedia'] == True])
-    result['hasHashtag'] = len(_top_tweets[_top_tweets['hashtags'].str.len() != 0])
-    result['avarage hashtags'] = sum(_top_tweets['hashtags'].str.len()) / tops
+    result['hasHashtag'] = sum([1 for i in _top_tweets['hashtags'] if len(i)>2])
     result['avarage text length'] = sum(_top_tweets['text'].str.len()) / tops
     result['avarage likes'] = sum(_top_tweets['likes']) / tops
     result['avarage retweet'] = sum(_top_tweets['retweets']) / tops
     result['avarage replies'] = sum(_top_tweets['replies']) / tops
-    result['avarage isReplied'] = sum(_top_tweets['isReplied']) / tops
+    result['avarage isReplyTo'] = sum(_top_tweets['isReplyTo']) / tops
     return result
+
+def convert_time(row):
+    '''
+    Converts the date string to pandas datetime 
+    '''
+    return pd.datetime(row)
