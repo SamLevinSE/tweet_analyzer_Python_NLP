@@ -85,8 +85,33 @@ def top_characteristics(_top_tweets, tops):
     result['avarage isReplyTo'] = sum(_top_tweets['isReplyTo']) / tops
     return result
 
-def convert_time(row):
+def create_wordcloud(data, mask=None, title=None, stop_words=''):
+    import nltk
+    from wordcloud import WordCloud
+    import matplotlib.pyplot as plt
     '''
-    Converts the date string to pandas datetime 
+    Creates and shows a word-cloud
     '''
-    return pd.datetime(row)
+    stopwords = nltk.corpus.stopwords.words('english')
+    _stop_words = stop_words
+    stopwords.extend(_stop_words)
+    
+    wordcloud = WordCloud(
+        background_color='black',
+        mask=mask,
+        stopwords=stopwords,
+        max_words=50,
+        max_font_size=500, 
+        scale=3,
+        random_state=2
+    ).generate(str(data))
+
+    fig = plt.figure(1, figsize=(15, 20))
+    plt.axis('off')
+    if title: 
+        fig.suptitle(title, fontsize=20)
+        fig.subplots_adjust(top=2.3)
+
+    plt.imshow(wordcloud)
+    plt.show()
+    
