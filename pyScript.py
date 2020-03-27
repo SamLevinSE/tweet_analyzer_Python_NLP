@@ -115,3 +115,62 @@ def create_wordcloud(data, mask=None, title=None, stop_words=''):
     plt.imshow(wordcloud)
     plt.show()
     
+def tweets_sentiment_analysis(row):
+    from textblob import TextBlob
+    '''
+    Returns a number between -1 to +1 for the given text
+    :params: row (string)
+    :return: -1 to +1 (int)
+    '''
+    return TextBlob(row).sentiment.polarity
+
+def _piechart_from_dict(value_dict):
+    import matplotlib.pyplot as plt
+    '''
+    Creates a pie chart from the given dict
+    :params: values (dict)
+    :returns: -
+    '''
+    _legend = [
+        'Positive: ' + str(value_dict.get('pos')),
+        'Negative: ' + str(value_dict.get('neg')),
+        'Natural: ' + str(value_dict.get('nat'))
+    ]
+    plt.pie(
+        pd.Series(value_dict),
+        colors=['yellowgreen', 'red', 'gold'],
+        startangle=90
+    )
+    plt.title('Tweet sementics')
+    
+    plt.legend(_legend)
+
+def _count_sentiments(column):
+    '''
+    Will count the nr of positive, negative and natural tweets in the given column
+    :params: DataFrame column
+    :returns: values (dict)
+    '''
+    value_dict = {
+        'pos': 0,
+        'neg': 0,
+        'nat': 0
+    }
+    
+    for value in column:
+        if value == 0:
+            value_dict['nat'] += 1
+        elif value > 0:
+            value_dict['pos'] += 1
+        else:
+            value_dict['neg'] += 1
+            
+    return value_dict
+    
+def column_to_piechart(column):
+    '''
+    Calls two other methods [_piechart_from_dict, _count_sentiments] to create a pie chart from given column
+    :params: column (DataFrame column)
+    :return: -
+    '''
+    _piechart_from_dict(_count_sentiments(column))
